@@ -486,8 +486,7 @@ export function CustomerAddOrderPage({
                       <Group
                         key={item.productId}
                         wrap="nowrap"
-                        align="stretch"
-                        gap="md"
+                        align="center"
                         mb="xs"
                         p="xs"
                         style={(theme) => ({
@@ -499,12 +498,10 @@ export function CustomerAddOrderPage({
                               : theme.white,
                         })}
                       >
-                        <Box style={{ flexShrink: 0 }}>
+                        <Box style={{ flexShrink: 0, width: 60, height: 60 }}>
                           <Image
                             src={item.image}
                             alt={item.name}
-                            width={60}
-                            height={60}
                             fit="contain"
                             radius="sm"
                           />
@@ -514,7 +511,7 @@ export function CustomerAddOrderPage({
                           justify="space-between"
                           style={{ flexGrow: 1, overflow: "hidden" }}
                         >
-                          <Text fw={500} size="sm" truncate="end" lineClamp={1}>
+                          <Text truncate="end" fw={500} size="sm" lineClamp={1}>
                             {item.name}
                           </Text>
                           <Text size="xs" c="dimmed" mt="auto">

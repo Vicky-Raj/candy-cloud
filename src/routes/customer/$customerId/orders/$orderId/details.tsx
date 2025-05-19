@@ -15,14 +15,14 @@ const createDummyOrderData = (
   orderItems: [
     {
       productId: "dummyProd1",
-      name: "Dummy Product 1 (View/Edit)",
+      name: "Dummy Product 1 Dummy Product 1",
       image: "https://picsum.photos/200?random=1",
       unitPrice: 19.99,
       quantity: 2,
     },
     {
       productId: "dummyProd2",
-      name: "Another Dummy Product (View/Edit)",
+      name: "Another Dummy Product Another Dummy Product",
       image: "https://picsum.photos/200?random=1",
       unitPrice: 25.5,
       quantity: 1,
