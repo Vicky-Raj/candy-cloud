@@ -1,4 +1,4 @@
-import{s as c,W as d,X as h,t as m,j as s,U as u,L as p,G as k,T as n,y as v,S as g}from"./index-CC7V-gct.js";import{I as x}from"./IconUserCircle-BoPiLGj2.js";import{T as y}from"./ThemeIcon-C61xp0iH.js";import{I as b}from"./IconChevronRight-qsD5p81x.js";/**
+import{s as c,W as d,X as h,t as m,j as s,U as u,L as p,G as k,T as n,y as v,S as g}from"./index-BdFAjZwO.js";import{I as x}from"./IconUserCircle-ihi05CuI.js";import{T as y}from"./ThemeIcon-c8StfVWs.js";import{I as b}from"./IconChevronRight-4cJNvxtJ.js";/**
  * @license @tabler/icons-react v3.33.0 - MIT
  *
  * This source code is licensed under the MIT license.
