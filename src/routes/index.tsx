@@ -22,6 +22,7 @@ import {
   IconMoon,
   IconPackage,
 } from "@tabler/icons-react";
+import logo from "../assets/logo.jpeg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -126,18 +127,20 @@ function Index() {
         })}
       >
         <Group h="100%" px={20} justify="space-between">
-          <Group>
-            <Image
-              src="/assets/logo.jpeg"
-              alt="Candy Cloud Delights Logo"
-              w={40}
-              h={40}
-              radius="sm"
-            />
-            <Title order={3} c="white">
-              Candy Cloud
-            </Title>
-          </Group>
+          <UnstyledButton component={Link} to="/login" display="inline-block">
+            <Group>
+              <Image
+                src={logo}
+                alt="Candy Cloud Delights Logo"
+                w={40}
+                h={40}
+                radius="sm"
+              />
+              <Title order={3} c="white">
+                Candy Cloud
+              </Title>
+            </Group>
+          </UnstyledButton>
           <ActionIcon
             variant="transparent"
             onClick={() => toggleColorScheme()}

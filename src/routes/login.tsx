@@ -12,8 +12,10 @@ import {
   useMantineColorScheme,
 } from "@mantine/core";
 
-import { createFileRoute } from "@tanstack/react-router";
-
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import logo from "../assets/logo.jpeg";
+import bg from "../assets/bg.png";
+import bgDark from "../assets/bg_dark.png";
 export const Route = createFileRoute("/login")({
   component: Login,
 });
@@ -22,10 +24,13 @@ function Login() {
   const theme = useMantineTheme();
   const { colorScheme } = useMantineColorScheme();
   const isDark = colorScheme === "dark";
+  const navigate = useNavigate();
 
-  const backgroundImage = isDark
-    ? "url(/assets/bg_dark.png)"
-    : "url(/assets/bg.png)";
+  const backgroundImage = isDark ? bgDark : bg;
+
+  const handleLogin = () => {
+    navigate({ to: "/" });
+  };
 
   return (
     <Center
@@ -35,7 +40,7 @@ function Login() {
         backgroundColor: isDark
           ? theme.colors.dark[7]
           : theme.colors.primaryColor[1],
-        backgroundImage: backgroundImage,
+        backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center center",
         backgroundRepeat: "no-repeat",
@@ -57,7 +62,7 @@ function Login() {
           <Stack gap="md" align="center" w="100%">
             <Box mb={rem(8)} mt={rem(-40)}>
               <img
-                src="/assets/logo.jpeg"
+                src={logo}
                 alt="Candy Cloud Delights Logo"
                 style={{
                   width: rem(100),
@@ -125,6 +130,7 @@ function Login() {
               size="md"
               mt="md"
               color="primaryColor"
+              onClick={handleLogin}
             >
               Login
             </Button>
