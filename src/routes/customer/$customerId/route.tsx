@@ -121,8 +121,7 @@ function CustomerIdLayout() {
     { title: customer.name, href: `/customer/${customerId}/` }, // Links to customer menu (index)
   ];
 
-  // If we are on a specific sub-page (and that page isn't the "Menu" itself),
-  // add its title to the breadcrumbs.
+  // If we are on a specific sub-page, add its title to the breadcrumbs.
   if (orderDetailsMatchParams) {
     // Special handling for order details to insert "Orders" link
     const { customerId: matchedCustId, orderId: matchedOrderId } =
@@ -135,11 +134,23 @@ function CustomerIdLayout() {
       title: `Order ${matchedOrderId}`,
       href: `/customer/${matchedCustId}/orders/${matchedOrderId}/details`,
     });
-  } else if (currentPageTitle && currentPageHref) {
-    // For all other pages, add the single current page title
+  } else if (currentPageTitle === "Add Order" && currentPageHref) {
+    // Special handling for "Add Order" page
+    breadcrumbItems.push({
+      title: "Orders",
+      href: `/customer/${customerId}/orders/`, // customerId from layout scope
+    });
+    breadcrumbItems.push({ title: currentPageTitle, href: currentPageHref });
+  } else if (
+    currentPageTitle &&
+    currentPageTitle !== "Menu" &&
+    currentPageHref
+  ) {
+    // For all other pages (e.g., "Orders" listing, "Details", "Collections")
+    // Exclude "Menu" as customer.name already serves this breadcrumb
     breadcrumbItems.push({ title: currentPageTitle, href: currentPageHref });
   }
-  // If currentPageTitle is "Menu", we don't add it again, as customer.name already serves as its breadcrumb.
+  // If currentPageTitle is "Menu", we don't add it again.
 
   const finalBreadcrumbElements = breadcrumbItems.map((item, index, arr) => (
     <Anchor

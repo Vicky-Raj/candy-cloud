@@ -15,6 +15,8 @@ import {
   TextInput,
   rem,
   useMantineTheme,
+  Affix,
+  Box,
 } from "@mantine/core";
 import {
   IconSun,
@@ -24,6 +26,7 @@ import {
   IconUsers,
   IconSearch,
   IconChevronRight,
+  IconPlus,
 } from "@tabler/icons-react";
 import React, { useState, useMemo } from "react";
 import { type Customer, dummyCustomers } from "../../data/customers";
@@ -96,6 +99,7 @@ function CustomersPage() {
   const computedColorScheme = useComputedColorScheme("light");
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const [searchTerm, setSearchTerm] = useState("");
+  const theme = useMantineTheme();
 
   const filteredCustomers = useMemo(() => {
     if (!searchTerm) {
@@ -205,6 +209,26 @@ function CustomersPage() {
           )}
         </Container>
       </AppShell.Main>
+      <Affix position={{ bottom: 40, right: 35 }}>
+        <Box
+          style={{
+            borderRadius: "9999px",
+            boxShadow: theme.shadows.md,
+          }}
+        >
+          <ActionIcon
+            component={Link}
+            to="/customers/add"
+            variant="filled"
+            style={{ width: rem(56), height: rem(56) }}
+            radius="xl"
+            aria-label="Add new customer"
+            color={theme.primaryColor}
+          >
+            <IconPlus style={{ width: rem(28), height: rem(28) }} />
+          </ActionIcon>
+        </Box>
+      </Affix>
     </AppShell>
   );
 }

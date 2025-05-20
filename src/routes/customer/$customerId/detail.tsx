@@ -2,6 +2,7 @@ import {
   createFileRoute,
   useParams,
   useLoaderData,
+  useNavigate,
   // Link, // No longer directly used in this component's output
 } from "@tanstack/react-router";
 import {
@@ -17,6 +18,7 @@ import {
   rem,
   Anchor,
   Avatar,
+  ActionIcon,
 } from "@mantine/core";
 import type { Customer } from "../../../data/customers";
 import {
@@ -26,6 +28,7 @@ import {
   IconCreditCard,
   IconTruckDelivery,
   IconId,
+  IconPencil,
 } from "@tabler/icons-react";
 
 // Path matches /customer/$customerId/detail
@@ -56,9 +59,9 @@ function DetailItem({ label, value, icon }: DetailItemProps) {
             {value}
           </Anchor>
         ) : (
-        <Text fz="sm" fw={500}>
-          {value || "N/A"}
-        </Text>
+          <Text fz="sm" fw={500}>
+            {value || "N/A"}
+          </Text>
         )}
       </Stack>
     </Group>
@@ -70,6 +73,7 @@ function CustomerDetailPage() {
   const customer = useLoaderData({
     from: "/customer/$customerId", // Adjusted to directly use the layout's loader data
   }) as Customer | undefined;
+  const navigate = useNavigate(); // Import and use navigate for the edit button
 
   const getInitials = (name: string) => {
     const parts = name.split(" ");
@@ -86,6 +90,21 @@ function CustomerDetailPage() {
   return (
     <Paper shadow="sm" p="lg" radius="md" withBorder>
       <Stack align="center" mb="md">
+        <Group justify="flex-end" style={{ width: "100%" }} mb="sm">
+          <ActionIcon
+            variant="outline"
+            color="blue"
+            title="Edit Customer"
+            onClick={() =>
+              navigate({
+                to: "/customers/$customerId/edit",
+                params: { customerId: customer.id },
+              })
+            }
+          >
+            <IconPencil size={18} />
+          </ActionIcon>
+        </Group>
         <Avatar size="xl" radius="xl" tt="uppercase">
           {getInitials(customer.name)}
         </Avatar>

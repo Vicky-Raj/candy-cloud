@@ -653,7 +653,7 @@ function CustomerOrderPage() {
       </Group>
 
       {customerId && (
-        <Affix position={{ bottom: 70, right: 20 }}>
+        <Affix position={{ bottom: 40, right: 35 }}>
           <Box
             style={{
               borderRadius: "9999px",

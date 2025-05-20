@@ -4,6 +4,8 @@ export interface Product {
   price: number;
   description: string;
   image: string;
+  vat?: number;
+  discount?: number;
 }
 
 export const dummyProducts: Product[] = [
@@ -14,6 +16,8 @@ export const dummyProducts: Product[] = [
     description:
       "A delightful mix of star-shaped gummies and shimmering sugar crystals. Out of this world flavor!",
     image: "https://picsum.photos/200?random=1",
+    vat: 20,
+    discount: 5,
   },
   {
     id: "PROD002",
@@ -22,6 +26,7 @@ export const dummyProducts: Product[] = [
     description:
       "Cool mint candies that melt in your mouth, revealing a swirl of magic.",
     image: "https://picsum.photos/200?random=2",
+    vat: 20,
   },
   {
     id: "PROD003",
@@ -30,6 +35,7 @@ export const dummyProducts: Product[] = [
     description:
       "Long, chewy raspberry ropes bursting with a tangy sweetness. Perfect for sharing.",
     image: "https://picsum.photos/200?random=3",
+    discount: 10,
   },
   {
     id: "PROD004",
@@ -37,6 +43,7 @@ export const dummyProducts: Product[] = [
     price: 35.0,
     description: "Crunchy honeycomb pieces enrobed in rich, golden chocolate.",
     image: "https://picsum.photos/200?random=4",
+    vat: 0,
   },
   {
     id: "PROD005",
@@ -45,6 +52,7 @@ export const dummyProducts: Product[] = [
     description:
       "Intensely sour blue raspberry spheres that will make your taste buds tingle.",
     image: "https://picsum.photos/200?random=5",
+    vat: 20,
   },
   {
     id: "PROD006",
@@ -53,6 +61,7 @@ export const dummyProducts: Product[] = [
     description:
       "Soft and chewy apple candies with a vibrant green color and a crisp taste.",
     image: "https://picsum.photos/200?random=6",
+    discount: 0,
   },
   {
     id: "PROD007",
@@ -61,6 +70,7 @@ export const dummyProducts: Product[] = [
     description:
       "Miniature chocolate cakes with a molten lava center. Pure decadence.",
     image: "https://picsum.photos/200?random=7",
+    vat: 20,
   },
   {
     id: "PROD008",
@@ -69,6 +79,7 @@ export const dummyProducts: Product[] = [
     description:
       "Smooth vanilla bean ganache covered in a delicate white chocolate shell.",
     image: "https://picsum.photos/200?random=8",
+    vat: 20,
   },
   {
     id: "PROD009",
@@ -77,6 +88,7 @@ export const dummyProducts: Product[] = [
     description:
       "Chewy caramel candies shaped like comets, with a sprinkle of sea salt.",
     image: "https://picsum.photos/200?random=9",
+    vat: 20,
   },
   {
     id: "PROD010",
@@ -85,5 +97,6 @@ export const dummyProducts: Product[] = [
     description:
       "Light and airy strawberry taffy that stretches for miles. Dusted with edible glitter.",
     image: "https://picsum.photos/200?random=10",
+    vat: 20,
   },
 ];

@@ -29,6 +29,8 @@ import {
   UnstyledButton,
   useMantineColorScheme,
   useMantineTheme,
+  Loader,
+  Modal,
 } from "@mantine/core";
 import { DatePickerInput, type DatesRangeValue } from "@mantine/dates";
 import { useForm, zodResolver } from "@mantine/form";
@@ -45,6 +47,8 @@ import {
 } from "@tabler/icons-react";
 import { dummyProducts, type Product } from "../../../../data/products";
 import { useState, useMemo, useEffect } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Helper component for displaying fields in read-only mode
 interface DisplayFieldProps {
@@ -149,12 +153,17 @@ export function CustomerAddOrderPage({
     from: "/customer/$customerId",
   }) as Customer | undefined;
   const customerName = parentCustomerData?.name || "Customer";
+  // const customerEmail = parentCustomerData?.email; // Email field is not available on Customer type
+  const customerPhone = parentCustomerData?.mobile || parentCustomerData?.phone; // Prioritize mobile, fallback to phone
+  // Address fields are directly on parentCustomerData
   const customerId = parentCustomerData?.id;
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
 
   const [productSearchValue, setProductSearchValue] = useState("");
   const [isEditing, setIsEditing] = useState(false); // For toggling edit state in view mode
+  const [isExportingPDF, setIsExportingPDF] = useState(false); // New state for PDF export loading
+  const [productSearchModalOpen, setProductSearchModalOpen] = useState(false); // State for product search modal
 
   const effectiveAddMode = addMode;
   const readOnlyMode = !effectiveAddMode && !isEditing;
@@ -182,6 +191,225 @@ export function CustomerAddOrderPage({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effectiveAddMode, orderData, form.setValues, form.resetDirty]); // form.setValues and resetDirty are stable
+
+  const handleExportPDF = async () => {
+    if (!orderData || !parentCustomerData) return;
+
+    setIsExportingPDF(true);
+    // setTimeout wrapper removed as per discussion
+    // Defer PDF generation to allow UI to update with loading state
+    // setTimeout(async () => { // Added async here if any internal PDF work becomes truly async
+    try {
+      const doc = new jsPDF();
+      const {
+        orderId,
+        orderDate,
+        deliveryDate,
+        paymentType,
+        orderItems,
+        comments,
+      } = form.values;
+
+      let yPos = 20; // Initial Y position
+      const lineSpacing = 6; // Space between lines of text
+      const sectionSpacing = 10; // Space between sections (e.g., Customer Details and Order Details)
+      const leftMargin = 14; // Left margin for text
+      const contentWidth = doc.internal.pageSize.getWidth() - leftMargin * 2; // Available width for text
+
+      // Document Title
+      doc.setFontSize(20);
+      doc.text("Invoice", doc.internal.pageSize.getWidth() / 2, yPos, {
+        align: "center",
+      });
+      yPos += sectionSpacing;
+
+      // Customer Details
+      doc.setFontSize(12);
+      doc.text("Customer Details:", leftMargin, yPos);
+      yPos += lineSpacing + 1; // Slightly more space after section title
+      doc.setFontSize(10);
+
+      doc.text(`Name: ${parentCustomerData.name}`, leftMargin, yPos);
+      yPos += lineSpacing;
+
+      if (customerPhone) {
+        doc.text(`Phone: ${customerPhone}`, leftMargin, yPos);
+        yPos += lineSpacing;
+      }
+
+      let fullAddress = parentCustomerData.address || "";
+      if (parentCustomerData.city) {
+        fullAddress += `${fullAddress ? ", " : ""}${parentCustomerData.city}`;
+      }
+      if (parentCustomerData.postCode) {
+        fullAddress += `${fullAddress ? ", " : ""}${parentCustomerData.postCode}`;
+      }
+
+      if (fullAddress) {
+        const addressLines = doc.splitTextToSize(
+          `Address: ${fullAddress}`,
+          contentWidth
+        );
+        doc.text(addressLines, leftMargin, yPos);
+        yPos += lineSpacing * addressLines.length;
+      }
+
+      yPos += sectionSpacing / 2; // Space before next section
+
+      // Order Details
+      doc.setFontSize(12);
+      doc.text("Order Details:", leftMargin, yPos);
+      yPos += lineSpacing + 1;
+      doc.setFontSize(10);
+
+      doc.text(`Order ID: ${orderId}`, leftMargin, yPos);
+      yPos += lineSpacing;
+
+      doc.text(
+        `Order Date: ${orderDate ? new Date(orderDate).toLocaleDateString() : "N/A"}`,
+        leftMargin,
+        yPos
+      );
+      yPos += lineSpacing;
+
+      if (deliveryDate) {
+        doc.text(
+          `Delivery Date: ${new Date(deliveryDate).toLocaleDateString()}`,
+          leftMargin,
+          yPos
+        );
+        yPos += lineSpacing;
+      }
+
+      doc.text(`Payment Type: ${paymentType}`, leftMargin, yPos);
+      yPos += sectionSpacing; // Space before table
+
+      // Order Items Table
+      const tableColumn = [
+        "Image",
+        "Product Name",
+        "Quantity",
+        "Unit Price",
+        "Total Price",
+      ];
+      const tableRows: (string | number)[][] = [];
+      let grandTotal = 0;
+
+      orderItems.forEach((item) => {
+        const totalPrice = item.quantity * item.unitPrice;
+        grandTotal += totalPrice;
+        const itemData = [
+          item.image,
+          item.name,
+          item.quantity,
+          `$${item.unitPrice.toFixed(2)}`,
+          `$${totalPrice.toFixed(2)}`,
+        ];
+        tableRows.push(itemData);
+      });
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [tableColumn],
+        body: tableRows,
+        theme: "striped",
+        headStyles: {
+          fillColor: [22, 160, 133],
+          minCellHeight: 12, // Specific, smaller min height for header cells
+        },
+        columnStyles: {
+          0: { cellWidth: 25 }, // Width for Image column
+          1: { cellWidth: "auto" },
+          2: { cellWidth: 20, halign: "center" }, // Quantity
+          3: { cellWidth: 30, halign: "right" }, // Unit Price
+          4: { cellWidth: 30, halign: "right" }, // Total Price
+        },
+        styles: {
+          // Global styles for the table, mainly for body cells due to override in headStyles
+          minCellHeight: 25, // Minimum height for body cells, to accommodate images
+        },
+        didDrawCell: (data) => {
+          if (
+            data.section === "body" &&
+            data.column.index === 0 &&
+            data.cell.raw
+          ) {
+            const imgUrl = data.cell.raw as string;
+            const cellPadding = 2;
+            const availableWidth = data.cell.width - 2 * cellPadding;
+            const availableHeight = data.cell.height - 2 * cellPadding;
+            const imgSize = Math.min(availableWidth, availableHeight);
+
+            const x = data.cell.x + (data.cell.width - imgSize) / 2;
+            const y = data.cell.y + (data.cell.height - imgSize) / 2;
+
+            try {
+              doc.addImage(imgUrl, "JPEG", x, y, imgSize, imgSize);
+            } catch (e) {
+              console.error(`Error adding image ${imgUrl} to PDF:`, e);
+              const errorText = "No img";
+              doc.setFontSize(6);
+              doc.setTextColor(100);
+              doc.text(
+                errorText,
+                data.cell.x + data.cell.width / 2,
+                data.cell.y + data.cell.height / 2,
+                { align: "center", baseline: "middle" }
+              );
+              doc.setTextColor(0);
+            }
+          }
+        },
+        foot: [
+          [
+            {
+              content: "Grand Total",
+              colSpan: 4, // Adjusted for 5 columns (Image is the first)
+              styles: {
+                halign: "right",
+                fontStyle: "bold",
+                textColor: [0, 0, 0],
+              }, // Ensure black text
+            },
+            {
+              content: `$${grandTotal.toFixed(2)}`,
+              styles: {
+                fontStyle: "bold",
+                textColor: [0, 0, 0],
+                halign: "right",
+              }, // Ensure black text and align right
+            },
+          ],
+        ],
+        footStyles: { fontStyle: "bold", fillColor: undefined }, // No background fill for footer
+        didDrawPage: (data) => {
+          yPos = data.cursor?.y || 0;
+        },
+      });
+
+      yPos = (doc as any).lastAutoTable.finalY || yPos;
+      yPos += sectionSpacing;
+
+      // Comments
+      if (comments && comments.trim() !== "") {
+        doc.setFontSize(10);
+        doc.text("Comments:", leftMargin, yPos);
+        yPos += lineSpacing - 1;
+        const splitComments = doc.splitTextToSize(comments, contentWidth);
+        doc.text(splitComments, leftMargin, yPos);
+      }
+
+      // doc.save(`Invoice-${orderId}.pdf`); // Old method: direct download
+      const blobUrl = await doc.output("bloburl"); // New method: get blob URL
+      window.open(blobUrl, "_blank"); // Open in new tab
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      // Optionally, show a notification to the user about the error
+    } finally {
+      setIsExportingPDF(false);
+    }
+    // }, 0); // Timeout of 0 ms to push to next event loop tick // Removed
+  };
 
   const pageTitle = effectiveAddMode
     ? `Add New Order for ${customerName}`
@@ -220,7 +448,7 @@ export function CustomerAddOrderPage({
         currentItems[existingItemIndex].quantity + 1
       );
     }
-    setProductSearchValue(""); // Clear search input
+    setProductSearchValue(""); // Clear search input, modal remains open for more additions
   };
 
   const handleSubmit = (values: AddOrderFormValues) => {
@@ -239,7 +467,19 @@ export function CustomerAddOrderPage({
       </Title>
       <Paper withBorder shadow="md" p="sm" radius="md">
         {!effectiveAddMode && !isEditing && (
-          <Group justify="flex-end" mb="xs">
+          <Group justify="flex-end" mb="xs" gap="xs">
+            {!effectiveAddMode && (
+              <Button
+                variant="gradient"
+                size="xs"
+                gradient={{ from: "teal", to: "lime", deg: 105 }}
+                onClick={handleExportPDF}
+                loading={isExportingPDF}
+                loaderProps={{ type: "oval" }}
+              >
+                Export to PDF
+              </Button>
+            )}
             <ActionIcon
               variant="outline"
               color="blue"
@@ -351,119 +591,136 @@ export function CustomerAddOrderPage({
 
           <Divider my="lg" label="Order Items" labelPosition="center" />
 
-          {/* Product Search Area - only show if adding or editing */}
           {(effectiveAddMode || isEditing) && (
-            <Box
-              style={{ position: "relative", marginBottom: theme.spacing.md }}
-            >
-              <TextInput
-                label="Search Products to Add"
-                placeholder="Type product name or description..."
-                value={productSearchValue}
-                onChange={(event) =>
-                  setProductSearchValue(event.currentTarget.value)
-                }
-              />
-              {/* Conditional rendering for search results (if shown) */}
-              {productSearchValue && (
-                <Box
-                  style={{
-                    position: "absolute",
-                    top: `calc(100% + ${theme.spacing.xs})`,
-                    left: 0,
-                    right: 0,
-                    zIndex: 1000,
-                    maxHeight: rem(320),
-                    overflowY: "auto",
-                    borderRadius: theme.radius.sm,
-                  }}
-                >
-                  {filteredProducts.length > 0 ? (
-                    <Paper shadow="sm" p="xs" withBorder>
-                      {filteredProducts.map((product) => (
-                        <UnstyledButton
-                          key={product.id}
-                          onClick={() => addProductToOrder(product)}
-                          style={{ display: "block", width: "100%" }}
-                          mb="xs"
-                        >
-                          <Box
-                            p="xs"
-                            style={(theme) => ({
-                              border: `1px solid ${colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-                              borderRadius: theme.radius.sm,
-                              backgroundColor:
-                                colorScheme === "dark"
-                                  ? theme.colors.dark[6]
-                                  : theme.white,
-                              transition: "background-color 100ms ease",
-                              "&:hover": {
-                                backgroundColor:
-                                  colorScheme === "dark"
-                                    ? theme.colors.dark[5]
-                                    : theme.colors.gray[0],
-                              },
-                            })}
-                          >
-                            <Group wrap="nowrap" gap="md" align="stretch">
-                              <Box
-                                style={{
-                                  flexShrink: 0,
-                                  width: rem(50),
-                                  height: rem(50),
-                                }}
-                              >
-                                <Image
-                                  src={product.image}
-                                  alt={product.name}
-                                  width={50}
-                                  height={50}
-                                  fit="cover"
-                                  radius="sm"
-                                />
-                              </Box>
-                              <Flex
-                                direction="column"
-                                justify="space-between"
-                                style={{ flexGrow: 1, overflow: "hidden" }}
-                              >
-                                <Title order={6} fw={500} lineClamp={2}>
-                                  {product.name}
-                                </Title>
-                                <Text size="xs" c="dimmed" mt="auto">
-                                  £{product.price.toFixed(2)}
-                                </Text>
-                              </Flex>
-                            </Group>
-                          </Box>
-                        </UnstyledButton>
-                      ))}
-                    </Paper>
-                  ) : (
-                    <Paper shadow="sm" p="md" withBorder>
-                      <Text size="sm" c="dimmed" ta="center">
-                        No products found matching "{productSearchValue}".
-                      </Text>
-                    </Paper>
-                  )}
-                </Box>
-              )}
-            </Box>
+            <Group justify="center" mb="md">
+              <Button
+                onClick={() => setProductSearchModalOpen(true)}
+                leftSection={<IconShoppingCartPlus size={16} />}
+                variant="outline"
+              >
+                Add Products to Order
+              </Button>
+            </Group>
           )}
 
-          {/* Selected Order Items Accordion */}
+          <Modal
+            opened={productSearchModalOpen}
+            onClose={() => {
+              setProductSearchModalOpen(false);
+              setProductSearchValue(""); // Clear search on modal close
+            }}
+            title="Search and Add Products"
+            size="lg"
+            overlayProps={{
+              backgroundOpacity: 0.55,
+              blur: 3,
+            }}
+            centered
+          >
+            <TextInput
+              placeholder="Type product name or description..."
+              value={productSearchValue}
+              onChange={(event) =>
+                setProductSearchValue(event.currentTarget.value)
+              }
+              autoFocus
+              mb="md"
+            />
+
+            <Box style={{ maxHeight: rem(350), overflowY: "auto" }}>
+              {productSearchValue && filteredProducts.length > 0 && (
+                <Paper shadow="sm" p="xs" withBorder>
+                  {filteredProducts.map((product) => (
+                    <UnstyledButton
+                      key={product.id}
+                      onClick={() => addProductToOrder(product)} // addProductToOrder clears search, modal stays open
+                      style={{ display: "block", width: "100%" }}
+                      mb="xs"
+                    >
+                      <Box
+                        p="xs"
+                        style={(theme) => ({
+                          border: `1px solid ${
+                            colorScheme === "dark"
+                              ? theme.colors.dark[4]
+                              : theme.colors.gray[3]
+                          }`,
+                          borderRadius: theme.radius.sm,
+                          backgroundColor:
+                            colorScheme === "dark"
+                              ? theme.colors.dark[6]
+                              : theme.white,
+                          transition: "background-color 100ms ease",
+                          "&:hover": {
+                            backgroundColor:
+                              colorScheme === "dark"
+                                ? theme.colors.dark[5]
+                                : theme.colors.gray[0],
+                          },
+                        })}
+                      >
+                        <Group wrap="nowrap" gap="md" align="stretch">
+                          <Box
+                            style={{
+                              flexShrink: 0,
+                              width: rem(50),
+                              height: rem(50),
+                            }}
+                          >
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              width={50}
+                              height={50}
+                              fit="cover"
+                              radius="sm"
+                            />
+                          </Box>
+                          <Flex
+                            direction="column"
+                            justify="space-between"
+                            style={{ flexGrow: 1, overflow: "hidden" }}
+                          >
+                            <Title order={6} fw={500} lineClamp={2}>
+                              {product.name}
+                            </Title>
+                            <Text size="xs" c="dimmed" mt="auto">
+                              £{product.price.toFixed(2)}
+                            </Text>
+                          </Flex>
+                        </Group>
+                      </Box>
+                    </UnstyledButton>
+                  ))}
+                </Paper>
+              )}
+              {productSearchValue && filteredProducts.length === 0 && (
+                <Paper shadow="sm" p="md" withBorder>
+                  <Text size="sm" c="dimmed" ta="center">
+                    No products found matching "{productSearchValue}".
+                  </Text>
+                </Paper>
+              )}
+              {!productSearchValue && (
+                <Text c="dimmed" ta="center" my="xl">
+                  Type in the search box above to find products.
+                </Text>
+              )}
+            </Box>
+          </Modal>
+
           {form.values.orderItems.length === 0 &&
-            !productSearchValue &&
+            // !productSearchValue && // This condition might no longer be relevant here
             (effectiveAddMode || isEditing) && (
               <Text c="dimmed" ta="center" my="md">
-                Search and select products to add them to the order.
+                Use the "Add Products to Order" button to search and add items.
               </Text>
             )}
 
           {form.values.orderItems.length > 0 && (
             <Accordion
-              variant="default" // Can be default or contained
-              defaultValue="order-items-panel" // Keep it open by default initially
+              variant="default"
+              defaultValue="order-items-panel"
               mt="md"
               mb="md"
               p={0}
@@ -519,7 +776,6 @@ export function CustomerAddOrderPage({
                           </Text>
                         </Flex>
 
-                        {/* Right: Quantity Adjustment & Total Price for item */}
                         <Flex
                           direction="column"
                           align="flex-end"
@@ -580,7 +836,6 @@ export function CustomerAddOrderPage({
             </Accordion>
           )}
 
-          {/* Order Summary Section */}
           {form.values.orderItems.length > 0 && (
             <Paper withBorder radius="md" p="md" mt="lg">
               <Title order={4} mb="sm">
@@ -655,36 +910,37 @@ export function CustomerAddOrderPage({
 
           {form.values.orderItems.length > 0 && <Divider my="lg" />}
 
-          <Group justify="flex-end" mt="xl">
-            <Button
-              variant="default"
-              onClick={() => {
-                if (!effectiveAddMode && isEditing) {
-                  setIsEditing(false); // Cancel edit, go back to view mode
-                  // Optionally reset form to original orderData if changes were made
-                  if (orderData) form.resetDirty(orderData);
-                } else {
-                  navigate({
-                    to: customerId
-                      ? `/customer/${customerId}/orders/`
-                      : "/customers",
-                  });
-                }
-              }}
-              leftSection={<IconArrowLeft size={14} />}
-            >
-              {!effectiveAddMode && isEditing ? "Cancel Edit" : "Cancel"}
-            </Button>
-            {(effectiveAddMode || isEditing) && (
+          {(effectiveAddMode || isEditing) && (
+            <Group justify="flex-end" mt="xl">
               <Button
-                type="submit"
-                leftSection={<IconDeviceFloppy size={14} />}
-                disabled={readOnlyMode || (!form.isValid() && form.isDirty())} // Also disable if in pure readOnlyMode
+                variant="default"
+                onClick={() => {
+                  if (!effectiveAddMode && isEditing) {
+                    setIsEditing(false);
+                    if (orderData) form.resetDirty(orderData);
+                  } else {
+                    navigate({
+                      to: customerId
+                        ? `/customer/${customerId}/orders/`
+                        : "/customers",
+                    });
+                  }
+                }}
+                leftSection={<IconArrowLeft size={14} />}
               >
-                {effectiveAddMode ? "Save Order" : "Update Order"}
+                {!effectiveAddMode && isEditing ? "Cancel Edit" : "Cancel"}
               </Button>
-            )}
-          </Group>
+              {(effectiveAddMode || isEditing) && (
+                <Button
+                  type="submit"
+                  leftSection={<IconDeviceFloppy size={14} />}
+                  disabled={readOnlyMode || (!form.isValid() && form.isDirty())}
+                >
+                  {effectiveAddMode ? "Save Order" : "Update Order"}
+                </Button>
+              )}
+            </Group>
+          )}
         </form>
       </Paper>
     </Container>

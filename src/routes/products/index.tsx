@@ -17,6 +17,7 @@ import {
   useMantineTheme,
   Flex, // Keep Flex for price display
   Box, // Added Box import
+  Affix, // Import Affix
 } from "@mantine/core";
 import {
   IconSun,
@@ -25,6 +26,7 @@ import {
   IconPackage, // For products page title
   IconSearch,
   IconCurrencyPound, // For price display
+  IconPlus, // Import IconPlus
 } from "@tabler/icons-react";
 import React, { useState, useMemo } from "react";
 import { type Product, dummyProducts } from "../../data/products";
@@ -51,13 +53,11 @@ function ProductCard({ product }: ProductCardProps) {
         height: "100%", // Allow grid to manage height, or set a fixed one if preferred
       }}
     >
-      <Group wrap="nowrap" gap="md" align="stretch">
-        <Box style={{ flexShrink: 0 }}>
+      <Group wrap="nowrap" gap="md" align="center">
+        <Box style={{ flexShrink: 0, width: 60, height: 60 }}>
           <Image
             src={product.image}
             alt={product.name}
-            width={80} // Smaller, fixed width for the image on the left
-            height={80} // Make it square, or adjust as needed for rectangle
             fit="cover"
             radius="sm"
           />
@@ -100,6 +100,7 @@ export function ProductsPage() {
   const computedColorScheme = useComputedColorScheme("light");
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const [searchTerm, setSearchTerm] = useState("");
+  const theme = useMantineTheme(); // Get theme for FAB color
 
   const filteredProducts = useMemo(() => {
     if (!searchTerm) {
@@ -188,10 +189,16 @@ export function ProductsPage() {
             onChange={(event) => setSearchTerm(event.currentTarget.value)}
           />
           {filteredProducts.length > 0 ? (
-            <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="lg">
+            <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="xs">
               {filteredProducts.map((product) => (
-                // Product cards are not links in this version
-                <ProductCard key={product.id} product={product} />
+                <Link
+                  key={product.id}
+                  to="/products/$productId/details"
+                  params={{ productId: product.id }}
+                  style={{ textDecoration: "none" }} // Remove default link underline
+                >
+                  <ProductCard product={product} />
+                </Link>
               ))}
             </SimpleGrid>
           ) : (
@@ -201,6 +208,26 @@ export function ProductsPage() {
           )}
         </Container>
       </AppShell.Main>
+      <Affix position={{ bottom: 40, right: 35 }}>
+        <Box
+          style={{
+            borderRadius: "9999px",
+            boxShadow: theme.shadows.md,
+          }}
+        >
+          <ActionIcon
+            component={Link}
+            to="/products/add" // Link to the add product page
+            variant="filled"
+            style={{ width: rem(56), height: rem(56) }}
+            radius="xl"
+            aria-label="Add new product"
+            color={theme.primaryColor}
+          >
+            <IconPlus style={{ width: rem(28), height: rem(28) }} />
+          </ActionIcon>
+        </Box>
+      </Affix>
     </AppShell>
   );
 }

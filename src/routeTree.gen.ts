@@ -15,8 +15,12 @@ import { Route as LoginImport } from './routes/login'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProductsIndexImport } from './routes/products/index'
 import { Route as CustomersIndexImport } from './routes/customers/index'
+import { Route as ProductsAddImport } from './routes/products/add'
+import { Route as CustomersAddImport } from './routes/customers/add'
 import { Route as CustomerCustomerIdRouteImport } from './routes/customer/$customerId/route'
 import { Route as CustomerCustomerIdIndexImport } from './routes/customer/$customerId/index'
+import { Route as ProductsProductIdDetailsImport } from './routes/products/$productId/details'
+import { Route as CustomersCustomerIdEditImport } from './routes/customers/$customerId/edit'
 import { Route as CustomerCustomerIdStatementImport } from './routes/customer/$customerId/statement'
 import { Route as CustomerCustomerIdDetailImport } from './routes/customer/$customerId/detail'
 import { Route as CustomerCustomerIdReturnsIndexImport } from './routes/customer/$customerId/returns/index'
@@ -51,6 +55,18 @@ const CustomersIndexRoute = CustomersIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ProductsAddRoute = ProductsAddImport.update({
+  id: '/products/add',
+  path: '/products/add',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CustomersAddRoute = CustomersAddImport.update({
+  id: '/customers/add',
+  path: '/customers/add',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const CustomerCustomerIdRouteRoute = CustomerCustomerIdRouteImport.update({
   id: '/customer/$customerId',
   path: '/customer/$customerId',
@@ -61,6 +77,18 @@ const CustomerCustomerIdIndexRoute = CustomerCustomerIdIndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CustomerCustomerIdRouteRoute,
+} as any)
+
+const ProductsProductIdDetailsRoute = ProductsProductIdDetailsImport.update({
+  id: '/products/$productId/details',
+  path: '/products/$productId/details',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CustomersCustomerIdEditRoute = CustomersCustomerIdEditImport.update({
+  id: '/customers/$customerId/edit',
+  path: '/customers/$customerId/edit',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const CustomerCustomerIdStatementRoute =
@@ -136,6 +164,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerCustomerIdRouteImport
       parentRoute: typeof rootRoute
     }
+    '/customers/add': {
+      id: '/customers/add'
+      path: '/customers/add'
+      fullPath: '/customers/add'
+      preLoaderRoute: typeof CustomersAddImport
+      parentRoute: typeof rootRoute
+    }
+    '/products/add': {
+      id: '/products/add'
+      path: '/products/add'
+      fullPath: '/products/add'
+      preLoaderRoute: typeof ProductsAddImport
+      parentRoute: typeof rootRoute
+    }
     '/customers/': {
       id: '/customers/'
       path: '/customers'
@@ -163,6 +205,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/customer/$customerId/statement'
       preLoaderRoute: typeof CustomerCustomerIdStatementImport
       parentRoute: typeof CustomerCustomerIdRouteImport
+    }
+    '/customers/$customerId/edit': {
+      id: '/customers/$customerId/edit'
+      path: '/customers/$customerId/edit'
+      fullPath: '/customers/$customerId/edit'
+      preLoaderRoute: typeof CustomersCustomerIdEditImport
+      parentRoute: typeof rootRoute
+    }
+    '/products/$productId/details': {
+      id: '/products/$productId/details'
+      path: '/products/$productId/details'
+      fullPath: '/products/$productId/details'
+      preLoaderRoute: typeof ProductsProductIdDetailsImport
+      parentRoute: typeof rootRoute
     }
     '/customer/$customerId/': {
       id: '/customer/$customerId/'
@@ -245,10 +301,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/customer/$customerId': typeof CustomerCustomerIdRouteRouteWithChildren
+  '/customers/add': typeof CustomersAddRoute
+  '/products/add': typeof ProductsAddRoute
   '/customers': typeof CustomersIndexRoute
   '/products': typeof ProductsIndexRoute
   '/customer/$customerId/detail': typeof CustomerCustomerIdDetailRoute
   '/customer/$customerId/statement': typeof CustomerCustomerIdStatementRoute
+  '/customers/$customerId/edit': typeof CustomersCustomerIdEditRoute
+  '/products/$productId/details': typeof ProductsProductIdDetailsRoute
   '/customer/$customerId/': typeof CustomerCustomerIdIndexRoute
   '/customer/$customerId/orders/add': typeof CustomerCustomerIdOrdersAddRoute
   '/customer/$customerId/collections': typeof CustomerCustomerIdCollectionsIndexRoute
@@ -260,10 +320,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/customers/add': typeof CustomersAddRoute
+  '/products/add': typeof ProductsAddRoute
   '/customers': typeof CustomersIndexRoute
   '/products': typeof ProductsIndexRoute
   '/customer/$customerId/detail': typeof CustomerCustomerIdDetailRoute
   '/customer/$customerId/statement': typeof CustomerCustomerIdStatementRoute
+  '/customers/$customerId/edit': typeof CustomersCustomerIdEditRoute
+  '/products/$productId/details': typeof ProductsProductIdDetailsRoute
   '/customer/$customerId': typeof CustomerCustomerIdIndexRoute
   '/customer/$customerId/orders/add': typeof CustomerCustomerIdOrdersAddRoute
   '/customer/$customerId/collections': typeof CustomerCustomerIdCollectionsIndexRoute
@@ -277,10 +341,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/customer/$customerId': typeof CustomerCustomerIdRouteRouteWithChildren
+  '/customers/add': typeof CustomersAddRoute
+  '/products/add': typeof ProductsAddRoute
   '/customers/': typeof CustomersIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/customer/$customerId/detail': typeof CustomerCustomerIdDetailRoute
   '/customer/$customerId/statement': typeof CustomerCustomerIdStatementRoute
+  '/customers/$customerId/edit': typeof CustomersCustomerIdEditRoute
+  '/products/$productId/details': typeof ProductsProductIdDetailsRoute
   '/customer/$customerId/': typeof CustomerCustomerIdIndexRoute
   '/customer/$customerId/orders/add': typeof CustomerCustomerIdOrdersAddRoute
   '/customer/$customerId/collections/': typeof CustomerCustomerIdCollectionsIndexRoute
@@ -295,10 +363,14 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/customer/$customerId'
+    | '/customers/add'
+    | '/products/add'
     | '/customers'
     | '/products'
     | '/customer/$customerId/detail'
     | '/customer/$customerId/statement'
+    | '/customers/$customerId/edit'
+    | '/products/$productId/details'
     | '/customer/$customerId/'
     | '/customer/$customerId/orders/add'
     | '/customer/$customerId/collections'
@@ -309,10 +381,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/customers/add'
+    | '/products/add'
     | '/customers'
     | '/products'
     | '/customer/$customerId/detail'
     | '/customer/$customerId/statement'
+    | '/customers/$customerId/edit'
+    | '/products/$productId/details'
     | '/customer/$customerId'
     | '/customer/$customerId/orders/add'
     | '/customer/$customerId/collections'
@@ -324,10 +400,14 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/customer/$customerId'
+    | '/customers/add'
+    | '/products/add'
     | '/customers/'
     | '/products/'
     | '/customer/$customerId/detail'
     | '/customer/$customerId/statement'
+    | '/customers/$customerId/edit'
+    | '/products/$productId/details'
     | '/customer/$customerId/'
     | '/customer/$customerId/orders/add'
     | '/customer/$customerId/collections/'
@@ -341,16 +421,24 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   CustomerCustomerIdRouteRoute: typeof CustomerCustomerIdRouteRouteWithChildren
+  CustomersAddRoute: typeof CustomersAddRoute
+  ProductsAddRoute: typeof ProductsAddRoute
   CustomersIndexRoute: typeof CustomersIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
+  CustomersCustomerIdEditRoute: typeof CustomersCustomerIdEditRoute
+  ProductsProductIdDetailsRoute: typeof ProductsProductIdDetailsRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   CustomerCustomerIdRouteRoute: CustomerCustomerIdRouteRouteWithChildren,
+  CustomersAddRoute: CustomersAddRoute,
+  ProductsAddRoute: ProductsAddRoute,
   CustomersIndexRoute: CustomersIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
+  CustomersCustomerIdEditRoute: CustomersCustomerIdEditRoute,
+  ProductsProductIdDetailsRoute: ProductsProductIdDetailsRoute,
 }
 
 export const routeTree = rootRoute
@@ -366,8 +454,12 @@ export const routeTree = rootRoute
         "/",
         "/login",
         "/customer/$customerId",
+        "/customers/add",
+        "/products/add",
         "/customers/",
-        "/products/"
+        "/products/",
+        "/customers/$customerId/edit",
+        "/products/$productId/details"
       ]
     },
     "/": {
@@ -389,6 +481,12 @@ export const routeTree = rootRoute
         "/customer/$customerId/orders/$orderId/details"
       ]
     },
+    "/customers/add": {
+      "filePath": "customers/add.tsx"
+    },
+    "/products/add": {
+      "filePath": "products/add.tsx"
+    },
     "/customers/": {
       "filePath": "customers/index.tsx"
     },
@@ -402,6 +500,12 @@ export const routeTree = rootRoute
     "/customer/$customerId/statement": {
       "filePath": "customer/$customerId/statement.tsx",
       "parent": "/customer/$customerId"
+    },
+    "/customers/$customerId/edit": {
+      "filePath": "customers/$customerId/edit.tsx"
+    },
+    "/products/$productId/details": {
+      "filePath": "products/$productId/details.tsx"
     },
     "/customer/$customerId/": {
       "filePath": "customer/$customerId/index.tsx",
