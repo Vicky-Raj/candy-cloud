@@ -1,4 +1,4 @@
-import{s as e}from"./index-BdFAjZwO.js";/**
+import{s as e}from"./index-CPE_v-qM.js";/**
  * @license @tabler/icons-react v3.33.0 - MIT
  *
  * This source code is licensed under the MIT license.
