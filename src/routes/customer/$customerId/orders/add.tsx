@@ -196,16 +196,26 @@ export function CustomerAddOrderPage({
 
     setIsExportingPDF(true);
 
-    // Use a Web Worker to generate the PDF off the main thread
     const worker = new PdfWorker();
 
     worker.onmessage = (e) => {
-      const { success, blobUrl, error } = e.data;
-      if (success && blobUrl) {
-        window.open(blobUrl, "_blank");
+      const { success, blob, error } = e.data;
+      if (success && blob) {
+        // Create a URL for the blob
+        const url = URL.createObjectURL(blob);
+
+        // Create a temporary anchor element and trigger the download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Invoice-${form.values.orderId || "details"}.pdf`; // Set the filename
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Clean up the object URL
+        URL.revokeObjectURL(url);
       } else {
         console.error("Error generating PDF from worker:", error);
-        // Optionally, show a notification to the user
       }
       setIsExportingPDF(false);
       worker.terminate();
@@ -217,9 +227,6 @@ export function CustomerAddOrderPage({
       worker.terminate();
     };
 
-    // Post data to the worker
-    // Note: We send `form.values` instead of `orderData` to ensure the most current,
-    // potentially edited, data is used for the PDF.
     worker.postMessage({
       orderData: form.values,
       parentCustomerData,

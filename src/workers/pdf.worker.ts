@@ -236,8 +236,8 @@ self.onmessage = async (e: MessageEvent<WorkerData>) => {
       doc.text(splitComments, leftMargin, yPos);
     }
 
-    const blobUrl = await doc.output("bloburl");
-    self.postMessage({ success: true, blobUrl });
+    const blob = doc.output("blob");
+    self.postMessage({ success: true, blob });
   } catch (error) {
     console.error("Error in PDF worker:", error);
     self.postMessage({ success: false, error: (error as Error).message });
