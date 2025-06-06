@@ -200,21 +200,9 @@ export function CustomerAddOrderPage({
     const worker = new PdfWorker();
 
     worker.onmessage = (e) => {
-      const { success, blob, error } = e.data;
-      if (success && blob) {
-        // Create a URL for the blob
-        const url = URL.createObjectURL(blob);
-
-        // Create a temporary anchor element and trigger download
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `Invoice-${form.values.orderId || "details"}.pdf`; // Set the filename here
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        // Revoke the blob URL to free up memory
-        URL.revokeObjectURL(url);
+      const { success, blobUrl, error } = e.data;
+      if (success && blobUrl) {
+        window.open(blobUrl, "_blank");
       } else {
         console.error("Error generating PDF from worker:", error);
         // Optionally, show a notification to the user
