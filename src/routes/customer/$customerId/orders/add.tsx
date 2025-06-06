@@ -200,9 +200,21 @@ export function CustomerAddOrderPage({
     const worker = new PdfWorker();
 
     worker.onmessage = (e) => {
-      const { success, blobUrl, error } = e.data;
-      if (success) {
-        window.open(blobUrl, "_blank");
+      const { success, blob, error } = e.data;
+      if (success && blob) {
+        // Create a URL for the blob
+        const url = URL.createObjectURL(blob);
+
+        // Create a temporary anchor element and trigger download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Invoice-${form.values.orderId || "details"}.pdf`; // Set the filename here
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Revoke the blob URL to free up memory
+        URL.revokeObjectURL(url);
       } else {
         console.error("Error generating PDF from worker:", error);
         // Optionally, show a notification to the user
@@ -257,7 +269,7 @@ export function CustomerAddOrderPage({
         quantity: 1,
       });
     } else {
-      // Product already in cart, user can adjust quantity in the accordion
+      // Product already in cart, user can adjust dquantity in the accordion
       form.setFieldValue(
         `orderItems.${existingItemIndex}.quantity`,
         currentItems[existingItemIndex].quantity + 1
