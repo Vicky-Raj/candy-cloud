@@ -8,5 +8,8 @@ export default defineConfig({
     TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
     react(),
   ],
-  base: "/candy-cloud"
+  worker: {
+    format: "es",
+  },
+  base: "/candy-cloud",
 });
