@@ -20,7 +20,6 @@ import { Route as CustomersAddImport } from './routes/customers/add'
 import { Route as CustomerCustomerIdRouteImport } from './routes/customer/$customerId/route'
 import { Route as CustomerCustomerIdIndexImport } from './routes/customer/$customerId/index'
 import { Route as ProductsProductIdDetailsImport } from './routes/products/$productId/details'
-import { Route as CustomersCustomerIdEditImport } from './routes/customers/$customerId/edit'
 import { Route as CustomerCustomerIdStatementImport } from './routes/customer/$customerId/statement'
 import { Route as CustomerCustomerIdDetailImport } from './routes/customer/$customerId/detail'
 import { Route as CustomerCustomerIdReturnsIndexImport } from './routes/customer/$customerId/returns/index'
@@ -82,12 +81,6 @@ const CustomerCustomerIdIndexRoute = CustomerCustomerIdIndexImport.update({
 const ProductsProductIdDetailsRoute = ProductsProductIdDetailsImport.update({
   id: '/products/$productId/details',
   path: '/products/$productId/details',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const CustomersCustomerIdEditRoute = CustomersCustomerIdEditImport.update({
-  id: '/customers/$customerId/edit',
-  path: '/customers/$customerId/edit',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -206,13 +199,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerCustomerIdStatementImport
       parentRoute: typeof CustomerCustomerIdRouteImport
     }
-    '/customers/$customerId/edit': {
-      id: '/customers/$customerId/edit'
-      path: '/customers/$customerId/edit'
-      fullPath: '/customers/$customerId/edit'
-      preLoaderRoute: typeof CustomersCustomerIdEditImport
-      parentRoute: typeof rootRoute
-    }
     '/products/$productId/details': {
       id: '/products/$productId/details'
       path: '/products/$productId/details'
@@ -307,7 +293,6 @@ export interface FileRoutesByFullPath {
   '/products': typeof ProductsIndexRoute
   '/customer/$customerId/detail': typeof CustomerCustomerIdDetailRoute
   '/customer/$customerId/statement': typeof CustomerCustomerIdStatementRoute
-  '/customers/$customerId/edit': typeof CustomersCustomerIdEditRoute
   '/products/$productId/details': typeof ProductsProductIdDetailsRoute
   '/customer/$customerId/': typeof CustomerCustomerIdIndexRoute
   '/customer/$customerId/orders/add': typeof CustomerCustomerIdOrdersAddRoute
@@ -326,7 +311,6 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsIndexRoute
   '/customer/$customerId/detail': typeof CustomerCustomerIdDetailRoute
   '/customer/$customerId/statement': typeof CustomerCustomerIdStatementRoute
-  '/customers/$customerId/edit': typeof CustomersCustomerIdEditRoute
   '/products/$productId/details': typeof ProductsProductIdDetailsRoute
   '/customer/$customerId': typeof CustomerCustomerIdIndexRoute
   '/customer/$customerId/orders/add': typeof CustomerCustomerIdOrdersAddRoute
@@ -347,7 +331,6 @@ export interface FileRoutesById {
   '/products/': typeof ProductsIndexRoute
   '/customer/$customerId/detail': typeof CustomerCustomerIdDetailRoute
   '/customer/$customerId/statement': typeof CustomerCustomerIdStatementRoute
-  '/customers/$customerId/edit': typeof CustomersCustomerIdEditRoute
   '/products/$productId/details': typeof ProductsProductIdDetailsRoute
   '/customer/$customerId/': typeof CustomerCustomerIdIndexRoute
   '/customer/$customerId/orders/add': typeof CustomerCustomerIdOrdersAddRoute
@@ -369,7 +352,6 @@ export interface FileRouteTypes {
     | '/products'
     | '/customer/$customerId/detail'
     | '/customer/$customerId/statement'
-    | '/customers/$customerId/edit'
     | '/products/$productId/details'
     | '/customer/$customerId/'
     | '/customer/$customerId/orders/add'
@@ -387,7 +369,6 @@ export interface FileRouteTypes {
     | '/products'
     | '/customer/$customerId/detail'
     | '/customer/$customerId/statement'
-    | '/customers/$customerId/edit'
     | '/products/$productId/details'
     | '/customer/$customerId'
     | '/customer/$customerId/orders/add'
@@ -406,7 +387,6 @@ export interface FileRouteTypes {
     | '/products/'
     | '/customer/$customerId/detail'
     | '/customer/$customerId/statement'
-    | '/customers/$customerId/edit'
     | '/products/$productId/details'
     | '/customer/$customerId/'
     | '/customer/$customerId/orders/add'
@@ -425,7 +405,6 @@ export interface RootRouteChildren {
   ProductsAddRoute: typeof ProductsAddRoute
   CustomersIndexRoute: typeof CustomersIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
-  CustomersCustomerIdEditRoute: typeof CustomersCustomerIdEditRoute
   ProductsProductIdDetailsRoute: typeof ProductsProductIdDetailsRoute
 }
 
@@ -437,7 +416,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsAddRoute: ProductsAddRoute,
   CustomersIndexRoute: CustomersIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
-  CustomersCustomerIdEditRoute: CustomersCustomerIdEditRoute,
   ProductsProductIdDetailsRoute: ProductsProductIdDetailsRoute,
 }
 
@@ -458,7 +436,6 @@ export const routeTree = rootRoute
         "/products/add",
         "/customers/",
         "/products/",
-        "/customers/$customerId/edit",
         "/products/$productId/details"
       ]
     },
@@ -500,9 +477,6 @@ export const routeTree = rootRoute
     "/customer/$customerId/statement": {
       "filePath": "customer/$customerId/statement.tsx",
       "parent": "/customer/$customerId"
-    },
-    "/customers/$customerId/edit": {
-      "filePath": "customers/$customerId/edit.tsx"
     },
     "/products/$productId/details": {
       "filePath": "products/$productId/details.tsx"

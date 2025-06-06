@@ -61,7 +61,7 @@ export type CustomerFormValues = z.infer<typeof customerFormSchema>;
 interface CustomerFormPageProps {
   editMode?: boolean;
   customerData?: Customer;
-  // customerId will be inferred from customerData in editMode or from route if needed
+  onCancel?: () => void;
 }
 
 // This is the route for /customers/add
@@ -72,6 +72,7 @@ export const Route = createFileRoute("/customers/add")({
 export function CustomerFormPage({
   editMode = false,
   customerData,
+  onCancel,
 }: CustomerFormPageProps) {
   const navigate = useNavigate();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
@@ -173,6 +174,14 @@ export function CustomerFormPage({
       ? `/customer/${customerData.id}/detail`
       : "/customers";
 
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    } else {
+      navigate({ to: backButtonLink });
+    }
+  };
+
   return (
     <AppShell header={{ height: 70 }} padding="md">
       <AppShell.Header
@@ -190,8 +199,7 @@ export function CustomerFormPage({
         <Group justify="space-between" style={{ flexGrow: 1 }}>
           <Group gap="xs">
             <ActionIcon
-              component={Link}
-              to={backButtonLink}
+              onClick={handleCancel}
               variant="transparent"
               title={editMode ? "Back to Details" : "Back to Customers"}
               size="lg"
@@ -227,6 +235,7 @@ export function CustomerFormPage({
       </AppShell.Header>
       <AppShell.Main
         style={(theme) => ({
+          padding: 0,
           backgroundColor:
             computedColorScheme === "dark"
               ? theme.colors.dark[8]
@@ -331,8 +340,7 @@ export function CustomerFormPage({
               <Group justify="flex-end" mt="xl">
                 <Button
                   variant="default"
-                  component={Link}
-                  to={backButtonLink}
+                  onClick={handleCancel}
                   leftSection={<IconArrowLeft size={14} />}
                 >
                   Cancel

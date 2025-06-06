@@ -462,7 +462,7 @@ export function CustomerAddOrderPage({
 
   return (
     <Container p={0} pb="xl">
-      <Title order={2} mb="md" ta="center">
+      <Title order={3} mb="md" ta="center">
         {pageTitle}
       </Title>
       <Paper withBorder shadow="md" p="sm" radius="md">

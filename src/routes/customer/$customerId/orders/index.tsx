@@ -605,8 +605,8 @@ function CustomerOrderPage() {
                       key={cell.id}
                       style={{
                         width: cell.column.getSize(),
-                        paddingTop: "10px",
-                        paddingBottom: "10px",
+                        paddingTop: "16px",
+                        paddingBottom: "16px",
                       }}
                     >
                       {flexRender(
